@@ -68,7 +68,7 @@ export default function __identity(fileUploaderOptions, $rootScope, $http, $wind
                     return done();
                 }
                 
-                let fileLikeObject = this.isFile(something) ? something : new FileLikeObject(something);
+                let fileLikeObject = (this.isFile(something)||this.isAnotherFileImplementation(something)) ? something : new FileLikeObject(something);
                 let pipes = this._convertFiltersToPipes(arrayOfFilters);
                 let pipeline = new Pipeline(pipes);
                 let onThrown = (err) => {
@@ -189,6 +189,16 @@ export default function __identity(fileUploaderOptions, $rootScope, $http, $wind
          */
         isFile(value) {
             return this.constructor.isFile(value);
+        }
+        /**
+         * Returns "true" if value is an instance of another File class, event if it is not the window.File class.
+         * For example, cordova uses another File definition.
+         * @param {*} value
+         * @returns {Boolean}
+         * @private
+         */
+        static isAnotherFileImplementation(value) {
+            return this.constructor.isAnotherFileImplementation(value);
         }
         /**
          * Returns "true" if value an instance of FileLikeObject
@@ -714,7 +724,17 @@ export default function __identity(fileUploaderOptions, $rootScope, $http, $wind
          * @private
          */
         static isFile(value) {
-            return (File && value instanceof File);
+            return (File && value instanceof File)||((value.constructor && value.constructor.name == 'File'));
+        }
+        /**
+         * Returns "true" if value an instance of another File class, event if it is not the window.File class.
+         * For example, cordova uses another File definition.
+         * @param {*} value
+         * @returns {Boolean}
+         * @private
+         */
+        static isAnotherFileImplementation(value) {
+            return (value.constructor && value.constructor.name == 'File');
         }
         /**
          * Returns "true" if value an instance of FileLikeObject
